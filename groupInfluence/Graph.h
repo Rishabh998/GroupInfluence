@@ -32,7 +32,7 @@ public:
 	int numberOfGroups;
 	vector<int> groupnodes;
 	unordered_map<int,unordered_set<int>> group;
-	float vi[10];
+	vector<float> vi;
 	Graph(string file,int groupSize,float beta);
 	void makegraph(string file);
 	unordered_map<string,float> prob;

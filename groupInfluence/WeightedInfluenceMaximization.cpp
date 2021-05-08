@@ -24,7 +24,7 @@ WeightedInfluenceMaximization::WeightedInfluenceMaximization(Graph &graph,unorde
 	//s1.insert(45);
 
 
-	rr=RRsets(graph,4000,s1);
+	rr=RRsets(graph,5000,s1,false);
 
 
 }

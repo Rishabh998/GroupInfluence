@@ -62,7 +62,7 @@ unordered_set<int> Processing::makeS1(Graph &g,RRsets &rr)
 					}
 					if(countMap[groups]>=vi[groups])
 					{
-						cout<<"Insertes into above threshold is "<<node<<"value is"<<vi[groups]<<" "<<groups<<"\n";
+						//cout<<"Insertes into above threshold is "<<node<<"value is"<<vi[groups]<<" "<<groups<<"\n";
 						nodesAboveThreshold.insert(node);
 					}
 			}
@@ -91,7 +91,7 @@ unordered_set<int> Processing::makeS1(Graph &g,RRsets &rr)
 		    	result.insert(poppedNode);
 		    }
 
-		    cout<<"\n"<<"Inserted to s1 "<<poppedNode<<"\n";
+		    //cout<<"\n"<<"Inserted to s1 "<<poppedNode<<"\n";
 		    currNodes.pop_back();
 		    if(erasedFromVector.find(poppedNode)!=erasedFromVector.end())
 		    {

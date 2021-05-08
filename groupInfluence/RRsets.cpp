@@ -13,7 +13,7 @@
 
 RRsets::RRsets(){}
 
-RRsets::RRsets(Graph &graph,int R,const unordered_set<int> &s1)
+RRsets::RRsets(Graph &graph,int R,const unordered_set<int> &s1,bool makeS1)
 {
 	// TODO Auto-generated constructor stub
 
@@ -21,10 +21,18 @@ RRsets::RRsets(Graph &graph,int R,const unordered_set<int> &s1)
 	this->nodes=graph.nodes;
 	this->edgeprob=graph.getEdgeprob();
 	this->s1=s1;
+	this->groupinfo=graph.groupinfo;
 	//this->weight=weight;
 	this->groupnodes=graph.groupnodes;
 	g=graph.transposeGraph();
-	makeRRsets(R);
+	if(makeS1)
+	{
+		makeRRsetsForS1();
+	}
+	else
+	{
+		makeRRsets(R);
+	}
 	//createTransposeRRsets();
 	cout<<"Size of RRset is"<<rrsets.size();
 
@@ -277,6 +285,28 @@ vector<int> RRsets::chooseRRnode(vector<int> nodes,int R)
 	    result.push_back(index);
 	}
 	return result;
+}
+void RRsets::makeRRsetsForS1()
+{
+	vector<int> randomlyChosenNodes;
+	int i=0;
+	for(const auto&[key,value]:groupinfo)
+	{
+		unordered_set<int> groupNodes=value;
+		vector<int> groupNodeVector(groupNodes.begin(), groupNodes.end());
+		vector<int> ChosenNodes;
+		ChosenNodes.clear();
+		ChosenNodes=chooseRRnode(groupNodeVector,groupNodes.size()); //Change size of R here
+		randomlyChosenNodes.insert(randomlyChosenNodes.end(), ChosenNodes.begin(), ChosenNodes.end());
+	}
+	for(const auto& it:randomlyChosenNodes)
+		{
+			unordered_set<int> rrSetOfNode=makeSingleRRset(it);
+			rrsets.push_back(rrSetOfNode);
+			rrMaptoIndex[i]=it;
+			i++;
+		}
+
 }
 void RRsets::makeRRsets(int R)
 {

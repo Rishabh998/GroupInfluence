@@ -73,6 +73,7 @@ unordered_map<int,int> calcSpreadOf(RRsets &rr,Graph &g,unordered_set<int> &s1,i
 		{
 			result[i]=0;
 		}
+		cout<<i<<" =>"<<result[i]<<"\n";
 	}
 	cout<<"Total spread is :"<<total;
 	return result;
@@ -101,7 +102,7 @@ unordered_map<int,float> assignGroupWeights(float scale[],const unordered_map<in
 	return result;
 }
 
-vector<float> MWU(Graph &graph,RRsets &rr,unordered_set<int> &s1,int k1,float delta,float lamda[10],unordered_map<int,int> &spreadS1)
+vector<float> MWU(Graph &graph,RRsets &rr,unordered_set<int> &s1,int k1,float delta,float lamda[],unordered_map<int,int> &spreadS1)
 {
 	int m=graph.numberOfGroups;
 	int n=graph.nodes;
@@ -142,51 +143,15 @@ vector<float> MWU(Graph &graph,RRsets &rr,unordered_set<int> &s1,int k1,float de
 			 for (auto& it : X) {
 			  xt[it]=xt[it]+1;
 				}
-			 for (int i=0;i<n;i++)
-				 {
-					 xt[i]=xt[i]/T;
-				 }
+
 			cout<<"\n";
 			cout<<"Value of T is"<<t<<"\n";
 			t++;
 		}
-/*
-	double T=2.0*(log(m)/(delta*delta));
-	WeightedInfluenceMaximization wm(graph,s1);
-
-
-	int t=1;
-	while(t<=T)
-	{
-		float scale[m];
-		float mt[m];
-		for(int i=0;i<m;i++)
+		for (int i=0;i<n;i++)
 		{
-			scale[i]=lamda[i]/(graph.vi[i]-spreadS1[i]);
+			xt[i]=xt[i]/T;
 		}
-		unordered_map<int,float> weights=assignGroupWeights(scale,wm.group);
-		vector<int> X  = wm.getTopSeed(k1,weights);
-		vector<float> spreadofX=wm.getFi(X, m);
-		unordered_set<int> seedofInfluence(X.begin(),X.end());
-		unordered_map<int,int> spreadOfX=calcSpreadOf(rr,graph,seedofInfluence);
-		for(int i=0;i<m;i++)
-		{
-			spreadofX[i]=spreadofX[i]/(graph.vi[i]-spreadS1[i]);
-		}
-		for(int i=0;i<m;i++)
-		{
-			mt[i]=spreadOfX[i]-alpha;
-			lamda[i]=lamda[i]*(1-delta*mt[i]);
-		}
-		 for (auto& it : X) {
-		   	xt[it]=xt[it]+1;
-		   		}
-		t++;
-	}
-	 for (int i=0;i<n;i++)
-	 {
-		 xt[i]=xt[i]/T;
-	 }*/
 	 return xt;
 }
 
@@ -197,7 +162,7 @@ int main() {
 
    Node n(1);
    string filename="in.txt";
-   Graph graph(filename,10,0.5);
+   Graph graph(filename,15,0.5);
    //unordered_map<string,float> prob=graph.getEdgeprob();
   // unordered_map<int,vector<int>> gt=graph.transposeGraph();
    vector<int> g;
@@ -212,7 +177,7 @@ int main() {
    unordered_map<string,float> prob=graph.getEdgeprob();
    unordered_map<int,vector<int>> gt=graph.transposeGraph();
    unordered_set<int> y2;
-   RRsets rr(graph,4000,y2);
+   RRsets rr(graph,5000,y2,true);
  // rr.printRRset();
 
   Processing p1(graph,rr);
@@ -226,51 +191,102 @@ int main() {
    }
 
    unordered_map<int,int> spreadS1= calcSpreadOf(rr,graph,s1,graph.numberOfGroups);
-   float lamda[10];
+   float lamda[graph.numberOfGroups];
    for(int i=0;i<graph.numberOfGroups;i++)
    {
 	   lamda[i]=1.0/(float)graph.numberOfGroups;
    }
-
-   vector<float> r2=MWU(graph,rr,s1,100-s1.size(),0.5,lamda,spreadS1);
-
-   for(const auto&elem:r2)
+   int k1=150;
+   vector<float> r2=MWU(graph,rr,s1,k1,0.5,lamda,spreadS1);
+   float eta=1.0-(sqrt(log(k1)/k1));
+   unordered_set<int> s2;
+   int startIndex=0;
+   for(auto&elem:r2)
    {
+	   elem=elem*eta;
 	  cout<<elem<<"\n";
+
+	  int randNum = (rand() % 1000) + 0;
+	  float pgenerated=(float)randNum/1000;
+	  if(pgenerated<=elem)
+	  {
+		  s2.insert(startIndex);
+	  }
+	  startIndex++;
    }
+   cout<<"\n"<<"Elements of s2 are: "<<"\n";
+   for(const auto& e2:s2)
+   {
+	   cout<<e2<<"\n";
+   }
+   unordered_set<int> s1unions2;
+   set_union(s1.begin(), s1.end(),s2.begin(), s2.end(),std::inserter(s1unions2, s1unions2.begin()));
+   calcSpreadOf(rr,graph,s1unions2,graph.numberOfGroups);
+
+ /* unordered_set<int> heuristicSet;
+  WeightedInfluenceMaximization wm(graph,heuristicSet);
+  unordered_map<int,float> updatedWeights;
+
+  for(int i=0;i<10;i++)
+  {
+	  cout<<"This is iteration for group "<<i<<"\n";
+	  int count=0;
 
 
+	  for(int j=0;j<graph.nodes;j++)
+	  {
+		  	 if(graph.groupinfo[i].find(j)==graph.groupinfo[i].end()) // Nodes is not in current group
+		  	 {
+		  		updatedWeights[j]=0;
+		  	 }
+		  	 else //If node is in current group
+		  	 {
+		  		updatedWeights[j]=1;
+		  		//cout<<j<<"\n";
+		  		count++;
+		  	 }
+	  }
+	  cout<<count<<"\n";
+   vector<int> result=wm.getTopSeed(2,updatedWeights); //wm.getTopSeed(2, updatedWeights);
+   cout<<result.size();
+   for(const auto &ele:result)
+   {
+	   cout<<ele;
+	   heuristicSet.insert(ele);
+   }
+   //vector<int> result;
+  }
+  cout<<"Heuristic set is: "<<"\n";
+  for(const auto& ele1:heuristicSet)
+  {
+	  cout<<ele1<<"\n";
+  }
+  calcSpreadOf(rr,graph,heuristicSet,10);
+  cout<<"\n"<<"Size of heuristic set is:"<<heuristicSet.size()<<"\n";
 
-
-
-
-
-
-
-
-
-   WeightedInfluenceMaximization wm(graph,y2);
- //  vector<int> result=wm.getTopSeed(50, weights);
-   vector<int> result;
    for(int i=0;i<3621;i++)
      {
-  	   g.push_back(i);
+  	   //g.push_back(i);
   	   weights[i]=1;
      }
 
 
   cout<<"\n";
-  for(const auto&it:result)
+  unordered_set<int> maxInfluenceSet;
+  vector<int> r3=wm.getTopSeed(20,weights);
+  for(const auto&it:r3)
   {
-	  cout<<it<<"\n";
+	  maxInfluenceSet.insert(it);
+	  //cout<<it<<"\n";
   }
   cout<<"End";
+  calcSpreadOf(rr,graph,maxInfluenceSet,10);
   vector<int> result1;
   cout<<"\n";
     for(const auto&it:result1)
     {
   	  cout<<it<<"\n";
-    }
+    }*/
     cout<<"End";
 
 

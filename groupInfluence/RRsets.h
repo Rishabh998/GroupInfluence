@@ -21,6 +21,7 @@ class RRsets {
 private:
 
 	unordered_map<int,unordered_set<int>> rrset;
+	unordered_map<int,unordered_set<int>> groupinfo;
 	unordered_map<int,unordered_set<int>> transpose_rrset;
 	unordered_set<int> rrsetsCancelledByS1;
 	unordered_set<int> s1;
@@ -35,12 +36,13 @@ private:
 	int nodes;
 public:
 	RRsets();
-	RRsets(Graph &graph,int R,const unordered_set<int> &s1);
+	RRsets(Graph &graph,int R,const unordered_set<int> &s1,bool makeS1);
 	void makeRRsets(int R);
 	unordered_set<int> makeSingleRRset(int bottomnode);
 	bool hasEdge(int u,int v);
 	unordered_map<int,unordered_set<int>> getRRsets();
 	void createTransposeRRsets();
+	void makeRRsetsForS1();
 	vector<int> seedOfWeightedInfluence(int k,unordered_map<int,float> &weight);
 	void changeInitalWeights(unordered_map<int,float> &weight);
 	float calculateInfluence(const unordered_set<int> &seed);

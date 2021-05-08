@@ -16,8 +16,9 @@
 #include <fstream>
 
 class WeightedInfluenceMaximization {
-	RRsets rr;
+
 public:
+	RRsets rr;
 	int nodes;
 	int edges;
 

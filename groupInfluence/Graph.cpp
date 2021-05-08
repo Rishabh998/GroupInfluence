@@ -21,54 +21,11 @@ Graph::Graph(string file,int numberOfGroups,float beta) {
 		edges=0;
 		makegraph(file);
 		this->gtranspose=transposeGraph();
-
-		//RRsets r1(this->nodes,this->prob,this->gtranspose,this->nodes,this->groupnodes,r);
-
 		this->numberOfGroups= numberOfGroups;
-
-		//this->vi[0]=3.0;
-		//this->vi[1]=3.0;
+		//float viarray[numberOfGroups];
+		//vi=viarray;
 		assignGroups( numberOfGroups,1);
 		assignVis(0.3);
-      /*
-		for(int i=0;i<nodes;i++)
-		{
-			int randNum = (rand() % 10) + 0;
-			vector<int> p;
-			p.push_back(0);
-			groupmap[0]=p;
-			if(i==0)
-			{
-				groupnodes.push_back(0);
-				continue;
-			}
-
-					if(randNum>5)
-					{
-						vector<int> a;
-						groupnodes.push_back(i);
-						int randGroup = (rand() % groupSize);
-						a.clear();
-						a.push_back(randGroup);
-						groupmap[i]=a;
-
-					}
-
-			vector<int> a;
-			a.clear();
-			if(i%2==0)
-			{
-				a.push_back(1);
-			}
-			else
-			{
-				a.push_back(0);
-			}
-			//groupmap[i]=a;
-		}*/
-
-
-
 		cout<<"loaded";
 }
 
@@ -108,7 +65,8 @@ void Graph::assignVis(float beta)
 	for(int i=0;i<numberOfGroups;i++)
 	{
 		//this->vi[i]=beta*groupinfo[i].size();
-		this->vi[i]=groupinfo[i].size()*0.5;
+		this->vi.push_back(0);
+		this->vi[i]=100;
 	}
 
 }
