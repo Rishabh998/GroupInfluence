@@ -22,8 +22,10 @@ using namespace std;
 class Processing {
 public:
 	Processing();
-	Processing(Graph &g,RRsets &rr);
+	Processing(Graph &g,RRsets &rr,int k);
+	float epsilon;
 	int m;
+	int k;
 	unordered_set<int> s1;
 	unordered_set<int> makeS1(Graph &g,RRsets &rr);
 	unordered_map<int,unordered_map<int,int>> nodeinfo;

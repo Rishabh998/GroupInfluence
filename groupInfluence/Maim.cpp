@@ -18,10 +18,10 @@
 
 using namespace std;
 
-unordered_map<int,int> calcSpreadOf(RRsets &rr,Graph &g,unordered_set<int> &s1,int m)
+unordered_map<int,float> calcSpreadOf(RRsets &rr,Graph &g,unordered_set<int> &s1,int m)
 {
-	unordered_map<int,int> result;
-	unordered_map<int,unordered_set<int>> r;
+	unordered_map<int,float> result;
+	unordered_map<int,vector<int>> r;
 	unordered_map<int,unordered_set<int>> groupinfo=g.groupinfo;
 	vector<unordered_set<int>> rrset=rr.getRRset();
 	unordered_map<int,int> rmap=rr.getIndexofRRsets();
@@ -42,13 +42,14 @@ unordered_map<int,int> calcSpreadOf(RRsets &rr,Graph &g,unordered_set<int> &s1,i
 					int crrgroup=gele;
 					if(r.find(crrgroup)==r.end())
 					{
-						unordered_set<int> elements;
-						elements.insert(grpNode);
+						//unordered_set<int> elements;
+						vector<int> elements;
+						elements.push_back(grpNode);
 						r[crrgroup]=elements;
 					}
 					else
 					{
-						r[crrgroup].insert(grpNode);
+						r[crrgroup].push_back(grpNode);
 					}
 				}
 
@@ -59,11 +60,13 @@ unordered_map<int,int> calcSpreadOf(RRsets &rr,Graph &g,unordered_set<int> &s1,i
 	}
 	cout<<"\n";
 	int total=0;
-	cout<<"Size of r is "<<r.size();
+	cout<<"Size of r is "<<r.size()<<"\n";
 
 	for(const auto &[key,value]:r)
 	{
-		result[key]=value.size();
+		int R=groupinfo[key].size()*3;
+		result[key]=(float)value.size()*((float)groupinfo[key].size()/(float)R);
+		//result[key]=(float)value.size()*(float)(1.0/3.0);
 		total+=result[key];
 		//cout<<"Spread "<<key<<" :"<<result[key]<<"\n";
 	}
@@ -102,7 +105,7 @@ unordered_map<int,float> assignGroupWeights(float scale[],const unordered_map<in
 	return result;
 }
 
-vector<float> MWU(Graph &graph,RRsets &rr,unordered_set<int> &s1,int k1,float delta,float lamda[],unordered_map<int,int> &spreadS1)
+vector<float> MWU(Graph &graph,RRsets &rr,unordered_set<int> &s1,int k1,float delta,float lamda[],unordered_map<int,float> &spreadS1)
 {
 	int m=graph.numberOfGroups;
 	int n=graph.nodes;
@@ -130,7 +133,8 @@ vector<float> MWU(Graph &graph,RRsets &rr,unordered_set<int> &s1,int k1,float de
 			cout<<"\n";
 			cout<<"Size of X is"<<X.size()<<"\n";
 			unordered_set<int> seedofInfluence(X.begin(),X.end());
-			unordered_map<int,int> spreadOfX=calcSpreadOf(rr,graph,seedofInfluence,m);
+			cout<<rr.getRRset().size()<<"\n";
+			unordered_map<int,float> spreadOfX=calcSpreadOf(rr,graph,seedofInfluence,m);
 			for(int i=0;i<m;i++)
 			{
 				spreadOfX[i]=graph.vi[i]-spreadS1[i]!=0?(spreadOfX[i]/(graph.vi[i]-spreadS1[i])):0;
@@ -162,25 +166,25 @@ int main() {
 
    Node n(1);
    string filename="in.txt";
-   Graph graph(filename,15,0.5);
+   int NumberOfgroups=10;
+   float beta=1.0;
+   float epsilon=0.4;
+   int k=150;
+
+   Graph graph(filename,NumberOfgroups,0.5);
    //unordered_map<string,float> prob=graph.getEdgeprob();
   // unordered_map<int,vector<int>> gt=graph.transposeGraph();
    vector<int> g;
-   unordered_map<int,float> weights;
-   for(int i=0;i<3261;i++)
-   {
-	  // g.push_back(i);
-	   weights[i]=1;
-   }
+
    g=graph.groupnodes;
 
    unordered_map<string,float> prob=graph.getEdgeprob();
    unordered_map<int,vector<int>> gt=graph.transposeGraph();
    unordered_set<int> y2;
-   RRsets rr(graph,5000,y2,true);
+   RRsets rr(graph,0,y2,true);
  // rr.printRRset();
 
-  Processing p1(graph,rr);
+  Processing p1(graph,rr,k);
   // unordered_set<int> s1;
   unordered_set<int> s1=p1.s1;
    cout<<"\n";
@@ -189,22 +193,26 @@ int main() {
    {
 	   cout<<"Element of s1 is"<<elem<<"\n";
    }
-
-   unordered_map<int,int> spreadS1= calcSpreadOf(rr,graph,s1,graph.numberOfGroups);
+   cout<<"\n"<<"**calculating spread of s1"<<"\n";
+   unordered_map<int,float> spreadS1= calcSpreadOf(rr,graph,s1,graph.numberOfGroups);
    float lamda[graph.numberOfGroups];
    for(int i=0;i<graph.numberOfGroups;i++)
    {
 	   lamda[i]=1.0/(float)graph.numberOfGroups;
    }
-   int k1=150;
+   int k1=k-s1.size();
    vector<float> r2=MWU(graph,rr,s1,k1,0.5,lamda,spreadS1);
-   float eta=1.0-(sqrt(log(k1)/k1));
+   float eta=1.0-(sqrt(log(k1)/(float)k1));
    unordered_set<int> s2;
    int startIndex=0;
    for(auto&elem:r2)
    {
-	   elem=elem*eta;
-	  cout<<elem<<"\n";
+	   //elem=elem*eta; //change eta here
+	   elem=elem*1;
+	   if(elem!=0)
+	   {
+		   cout<<elem<<"\n";
+	   }
 
 	  int randNum = (rand() % 1000) + 0;
 	  float pgenerated=(float)randNum/1000;
@@ -222,72 +230,23 @@ int main() {
    unordered_set<int> s1unions2;
    set_union(s1.begin(), s1.end(),s2.begin(), s2.end(),std::inserter(s1unions2, s1unions2.begin()));
    calcSpreadOf(rr,graph,s1unions2,graph.numberOfGroups);
-
- /* unordered_set<int> heuristicSet;
-  WeightedInfluenceMaximization wm(graph,heuristicSet);
-  unordered_map<int,float> updatedWeights;
-
-  for(int i=0;i<10;i++)
-  {
-	  cout<<"This is iteration for group "<<i<<"\n";
-	  int count=0;
+   cout<<"\n"<<"Size of selected nodes is :"<<s1unions2.size();
 
 
-	  for(int j=0;j<graph.nodes;j++)
-	  {
-		  	 if(graph.groupinfo[i].find(j)==graph.groupinfo[i].end()) // Nodes is not in current group
-		  	 {
-		  		updatedWeights[j]=0;
-		  	 }
-		  	 else //If node is in current group
-		  	 {
-		  		updatedWeights[j]=1;
-		  		//cout<<j<<"\n";
-		  		count++;
-		  	 }
-	  }
-	  cout<<count<<"\n";
-   vector<int> result=wm.getTopSeed(2,updatedWeights); //wm.getTopSeed(2, updatedWeights);
-   cout<<result.size();
-   for(const auto &ele:result)
-   {
-	   cout<<ele;
-	   heuristicSet.insert(ele);
-   }
-   //vector<int> result;
-  }
-  cout<<"Heuristic set is: "<<"\n";
-  for(const auto& ele1:heuristicSet)
-  {
-	  cout<<ele1<<"\n";
-  }
-  calcSpreadOf(rr,graph,heuristicSet,10);
-  cout<<"\n"<<"Size of heuristic set is:"<<heuristicSet.size()<<"\n";
-
-   for(int i=0;i<3621;i++)
-     {
-  	   //g.push_back(i);
-  	   weights[i]=1;
-     }
-
-
-  cout<<"\n";
-  unordered_set<int> maxInfluenceSet;
-  vector<int> r3=wm.getTopSeed(20,weights);
-  for(const auto&it:r3)
-  {
-	  maxInfluenceSet.insert(it);
-	  //cout<<it<<"\n";
-  }
-  cout<<"End";
-  calcSpreadOf(rr,graph,maxInfluenceSet,10);
-  vector<int> result1;
-  cout<<"\n";
-    for(const auto&it:result1)
-    {
-  	  cout<<it<<"\n";
-    }*/
     cout<<"End";
+    /*string myText;
+    set<int> infseed;
+    ifstream MyReadFile("seed.txt");
+    while (getline (MyReadFile, myText)) {
+        // Output the text from the file
+        cout << myText;
+        cout << "\n";
+        infseed.insert(stoi(myText));
+
+    }
+    MyReadFile.close();
+   // cout<<"\n"<<"Start Influence"<<"\n";
+    calcSpreadOf(rr,graph,s1unions2,graph.numberOfGroups);*/
 
 
 

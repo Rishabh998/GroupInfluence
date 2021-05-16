@@ -22,9 +22,8 @@ WeightedInfluenceMaximization::WeightedInfluenceMaximization(Graph &graph,unorde
 
 	//unordered_set<int> s1=p.makeS1(graph);
 	//s1.insert(45);
-
-
-	rr=RRsets(graph,5000,s1,false);
+	int R=15000;
+	rr=RRsets(graph,R,s1,false);
 
 
 }

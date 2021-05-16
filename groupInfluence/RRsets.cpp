@@ -86,7 +86,7 @@ void RRsets::changeInitalWeights(unordered_map<int,float> &weight)
 	{
 		unordered_set<int> crrset=it;
 		//cout<<"Size is"<<it.size()<<"\n";
-		float group_weight=weight[rrMaptoIndex[index]];
+		float group_weight=weight[rrMaptoIndex[index]]<0?0:weight[rrMaptoIndex[index]];
 
 		for (const auto& elem: crrset)
 		{
@@ -201,7 +201,7 @@ int RRsets::getTopElement()
 		 }
 	  }
 	 }
-	 //RRweights[maxindex]=-1;
+	 RRweights[maxindex]=0;
 	 return maxindex;
 }
 void RRsets::updateAffectedWeights(int topWeightedElement,unordered_set<int> &cancelledRRSetIndex,unordered_map<int,float> &weight)
@@ -242,6 +242,7 @@ vector<int> RRsets::seedOfWeightedInfluence(int k,unordered_map<int,float> &weig
 {
 	vector<int> result;
 	unordered_set<int> cancelledRRSetIndex;
+	cancelledRRSetIndex.clear();
 	while(k>0)
 	{
 		int topWeightedElement=getTopElement();
@@ -249,9 +250,9 @@ vector<int> RRsets::seedOfWeightedInfluence(int k,unordered_map<int,float> &weig
 		{
 			return result;
 		}
-		cout<<"Element inserted" <<topWeightedElement;
+		cout<<"," <<topWeightedElement;//<<" : "<<RRweights[topWeightedElement];
 		result.push_back(topWeightedElement);
-		unordered_set<int> reachable = transpose_rrset[topWeightedElement];
+		//unordered_set<int> reachable = transpose_rrset[topWeightedElement];
 		updateAffectedWeights(topWeightedElement,cancelledRRSetIndex,weight);
 		k--;
 	}
@@ -296,7 +297,8 @@ void RRsets::makeRRsetsForS1()
 		vector<int> groupNodeVector(groupNodes.begin(), groupNodes.end());
 		vector<int> ChosenNodes;
 		ChosenNodes.clear();
-		ChosenNodes=chooseRRnode(groupNodeVector,groupNodes.size()); //Change size of R here
+		int R=groupNodes.size()*3;
+		ChosenNodes=chooseRRnode(groupNodeVector,R); //Change size of R here
 		randomlyChosenNodes.insert(randomlyChosenNodes.end(), ChosenNodes.begin(), ChosenNodes.end());
 	}
 	for(const auto& it:randomlyChosenNodes)

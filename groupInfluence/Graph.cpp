@@ -66,7 +66,7 @@ void Graph::assignVis(float beta)
 	{
 		//this->vi[i]=beta*groupinfo[i].size();
 		this->vi.push_back(0);
-		this->vi[i]=100;
+		this->vi[i]=500;
 	}
 
 }

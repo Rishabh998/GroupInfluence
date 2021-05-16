@@ -7,15 +7,22 @@
 
 #include "Processing.h"
 #include "RRsets.h"
+#include <math.h>
 
 Processing::Processing() {
 	// TODO Auto-generated constructor stub
 	this->m=0;
 
 }
-Processing::Processing(Graph &g,RRsets &rr) {
+Processing::Processing(Graph &g,RRsets &rr,int k) {
 	this->m=g.numberOfGroups;
+	this->k=k;
+	float a=1.0/(10.0*log(10.0));
+	float b=(float)pow((m/k), 1.0 / 4.0);
+	epsilon=min(a,b);
+	cout<<"\n"<<"Value of epsilon is "<<epsilon<<"\n";
 	this->s1=makeS1(g,rr);
+
 
 }
 unordered_set<int> Processing::makeS1(Graph &g,RRsets &rr)
@@ -60,7 +67,7 @@ unordered_set<int> Processing::makeS1(Graph &g,RRsets &rr)
 					{
 						countMap[groups]=1;
 					}
-					if(countMap[groups]>=vi[groups])
+					if(countMap[groups]>=epsilon*epsilon*epsilon*vi[groups])
 					{
 						//cout<<"Insertes into above threshold is "<<node<<"value is"<<vi[groups]<<" "<<groups<<"\n";
 						nodesAboveThreshold.insert(node);
@@ -107,14 +114,14 @@ unordered_set<int> Processing::makeS1(Graph &g,RRsets &rr)
 		    unordered_set<int> affectedNode=getAffectedNodes(nodeBelongsto,nodesAboveThreshold,rrset,poppedNode);
 		    for(const auto&elem:affectedNode)
 		    {
-		    	cout<<"Affected node is "<<elem<<"\n";
+		    	//cout<<"Affected node is "<<elem<<"\n";
 		    	//firstNodeMinusSecond(elem,poppedNode);
 		    	if(!isStillValid(elem,vi,m)) ///////Change GROUP Size here
 		    	{
 		    		nodesAboveThreshold.erase(elem);
 		    		//currNodes.erase(std::remove(currNodes.begin(), currNodes.end(), elem), currNodes.end());
 		    		erasedFromVector.insert(elem);
-		    		cout<<"\n"<<"************This node is deleted**********"<<elem<<"\n";
+		    		//cout<<"\n"<<"************This node is deleted**********"<<elem<<"\n";
 		    	}
 		    }
 
@@ -152,7 +159,7 @@ bool Processing::isStillValid(int elem,float vi[],int size)
 	{
 		//cout<<"\n"<<"key is "<<key<<"\n";
 		//cout<<"value is "<<value<<"\n";
-		if(key>=0 && key<size && vi[key]<=value)
+		if(key>=0 && key<size && vi[key]*epsilon*epsilon*epsilon<=value)
 		{
 			//cout<<"Valid,coz of group"<<key;
 			return true;
