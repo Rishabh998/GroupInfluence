@@ -16,10 +16,19 @@ Processing::Processing() {
 }
 Processing::Processing(Graph &g,RRsets &rr,int k) {
 	this->m=g.numberOfGroups;
+	cout<<"\n";
+	cout<<m;cout<<k;
+	float mbyk=((float)m/(float)k);
 	this->k=k;
 	float a=1.0/(10.0*log(10.0));
-	float b=(float)pow((m/k), 1.0 / 4.0);
-	epsilon=min(a,b);
+	cout<<"\n";
+	//cout<<"a is"<<a<<"\n";
+
+	//cout<<"m/k is"<<mbyk<<"\n";
+	float b=(float)pow((float)mbyk,0.25);
+	//cout<<"b is"<<b<<"\n";
+	//epsilon=min(a,b);
+	epsilon=100.0;
 	cout<<"\n"<<"Value of epsilon is "<<epsilon<<"\n";
 	this->s1=makeS1(g,rr);
 
@@ -82,7 +91,7 @@ unordered_set<int> Processing::makeS1(Graph &g,RRsets &rr)
 	cout<<"Node that are above threshold are : \n";
 	for(const auto&e:nodesAboveThreshold)
 	{
-		cout<<e<<"\n";
+		//cout<<e<<"\n";
 	}
 	cout<<"Node above threshold ends : \n";
 	cout<<"Size of nodeinfo is: "<<nodeinfo.size()<<"\n";

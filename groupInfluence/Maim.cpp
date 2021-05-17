@@ -52,7 +52,7 @@ unordered_map<int,float> calcSpreadOf(RRsets &rr,Graph &g,unordered_set<int> &s1
 						r[crrgroup].push_back(grpNode);
 					}
 				}
-
+				break;
 			}
 		}
 		index++;
@@ -166,10 +166,10 @@ int main() {
 
    Node n(1);
    string filename="in.txt";
-   int NumberOfgroups=10;
+   int NumberOfgroups=6;
    float beta=1.0;
    float epsilon=0.4;
-   int k=150;
+   int k=200;
 
    Graph graph(filename,NumberOfgroups,0.5);
    //unordered_map<string,float> prob=graph.getEdgeprob();
@@ -216,7 +216,7 @@ int main() {
 
 	  int randNum = (rand() % 1000) + 0;
 	  float pgenerated=(float)randNum/1000;
-	  if(pgenerated<=elem)
+	  if(pgenerated<elem)
 	  {
 		  s2.insert(startIndex);
 	  }
