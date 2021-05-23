@@ -26,7 +26,7 @@ Processing::Processing(Graph &g,RRsets &rr,int k) {
 
 	//cout<<"m/k is"<<mbyk<<"\n";
 	float b=(float)pow((float)mbyk,0.25);
-	//cout<<"b is"<<b<<"\n";
+	cout<<"b is"<<b<<"\n";
 	//epsilon=min(a,b);
 	epsilon=100.0;
 	cout<<"\n"<<"Value of epsilon is "<<epsilon<<"\n";

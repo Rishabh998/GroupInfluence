@@ -14,9 +14,11 @@
 #include "WeightedInfluenceMaximization.h"
 #include <math.h>
 #include "Processing.h"
+#include "Simulation.h"
 #define alpha 0.63
-
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
 
 unordered_map<int,float> calcSpreadOf(RRsets &rr,Graph &g,unordered_set<int> &s1,int m)
 {
@@ -104,6 +106,28 @@ unordered_map<int,float> assignGroupWeights(float scale[],const unordered_map<in
 
 	return result;
 }
+unordered_map<int,float> SIMassignGroupWeights(int nodes,unordered_map<int,unordered_set<int>> groupinfo)
+{
+	unordered_map<int,float> result;
+	for(int i=0;i<nodes;i++)
+	{
+		for(int j=0;j<groupinfo.size();j++)
+		{
+			unordered_set<int> nodesOfgroup=groupinfo[j];
+			if(nodesOfgroup.find(i)!=nodesOfgroup.end())
+			{
+				result[i]=1.0;
+				break;
+			}
+		}
+		if(result.find(i)==result.end())
+		{
+			result[i]=0.0;
+		}
+	}
+	return result;
+
+}
 
 vector<float> MWU(Graph &graph,RRsets &rr,unordered_set<int> &s1,int k1,float delta,float lamda[],unordered_map<int,float> &spreadS1)
 {
@@ -160,16 +184,147 @@ vector<float> MWU(Graph &graph,RRsets &rr,unordered_set<int> &s1,int k1,float de
 }
 
 
+vector<float> SimulationMWU(Graph &graph,unordered_set<int> &s1,int k1,float delta,float lamda[],unordered_map<int,float> &spreadS1,int numSim)
+{
+	int m=graph.numberOfGroups;
+	int n=graph.nodes;
+	vector<float> xt(n);
+	double T=2.0*(log(m)/(delta*delta));
+	//WeightedInfluenceMaximization wm(graph,s1);
+	Simulation sim(graph);
+	unordered_map<int,float> weights=SIMassignGroupWeights(graph.nodes,graph.groupinfo);
+	int t=1;
+		while(t<=T)
+		{
+
+			float scale[m];
+			float mt[m];
+			for(int i=0;i<m;i++)
+				{
+					scale[i]=(graph.vi[i]-spreadS1[i])!=0?(lamda[i]/(graph.vi[i]-spreadS1[i])):0;
+					if(scale[i]<0)
+					{
+						scale[i]=0;
+					}
+					cout<<scale[i];
+				}
+
+
+			vector<int> X;
+			unordered_set<int> seedX=sim.InfluenceMaximization(weights,scale,k1,numSim);
+			X.clear();
+			for(const auto&elem:seedX)
+			{
+				X.push_back(elem);
+			}
+
+			//copy(seedX.begin(), seedX.end(), X.begin());
+			cout<<"\n";
+			cout<<"Size of X is"<<X.size()<<"\n";
+
+			vector<int> spreadOfX=sim.NtimescalcInf(seedX, weights, numSim);
+
+
+			for(int i=0;i<m;i++)
+			{
+				spreadOfX[i]=graph.vi[i]-spreadS1[i]!=0?(spreadOfX[i]/(graph.vi[i]-spreadS1[i])):0;
+			}
+			for(int i=0;i<m;i++)
+			{
+				mt[i]=spreadOfX[i]-alpha;
+				lamda[i]=lamda[i]*(1-delta*mt[i]);
+			}
+			 for (auto& it : X) {
+			  xt[it]=xt[it]+1;
+				}
+
+			cout<<"\n";
+			cout<<"Value of T is"<<t<<"\n";
+			t++;
+		}
+		for (int i=0;i<n;i++)
+		{
+			xt[i]=xt[i]/T;
+		}
+	 return xt;
+}
+
+
 
 int main() {
    cout << "Starting..." << endl;
+   auto start = high_resolution_clock::now();
+   string filename="in.txt";
+   int k=100;
+   int numberOfSimulation=1;
+   Graph graph(filename,6,0.5);
+
+   unordered_set<int> s1;
+   //unordered_set<int> seed;
+   //seed.insert(45);
+   Simulation sim(graph);
+
+
+   float lamda[graph.numberOfGroups];
+   unordered_map<int,float> spreadS1; //MAKE A FUNCTION TO CALC SPREAD OF S1
+   for(int i=0;i<graph.numberOfGroups;i++)
+   {
+	   lamda[i]=1.0/(float)graph.numberOfGroups;
+	   spreadS1[i]=0.0;
+   }
+   int k1=k-s1.size();
+   cout<<"caaling MWU function";
+  vector<float> r2=SimulationMWU(graph,s1,k1,0.5,lamda,spreadS1,numberOfSimulation);
+   cout<<"Function call done";
+   float eta=1.0-(sqrt(log(k1)/(float)k1));
+   unordered_set<int> s2;
+   int startIndex=0;
+   for(auto&elem:r2)
+   {
+	   //elem=elem*eta; //change eta here
+	   elem=elem*1;
+	   if(elem!=0)
+	   {
+		   cout<<elem<<"\n";
+	   }
+
+	  int randNum = (rand() % 1000) + 0;
+	  float pgenerated=(float)randNum/1000;
+	  if(pgenerated<elem)
+	  {
+		  s2.insert(startIndex);
+	  }
+	  startIndex++;
+   }
+   cout<<"\n"<<"Elements of s2 are: "<<"\n";
+   for(const auto& e2:s2)
+   {
+	   cout<<e2<<"\n";
+   }
+
+   unordered_map<int,float> weights=SIMassignGroupWeights(graph.nodes,graph.groupinfo);
+   vector<int> res=sim.NtimescalcInf(s2, weights, numberOfSimulation);
+   for(int i=0;i<res.size();i++)
+   {
+	   cout<<i<<"->"<<res[i]<<" "<<"\n";
+   }
+   auto stop = high_resolution_clock::now();
+   auto duration = duration_cast<microseconds>(stop - start);
+
+   cout << "Time taken by function: "
+        << duration.count() << " microseconds" << endl;
+
+
+
+/*
+ ******************************************USING RRSETS**********************************
 
    Node n(1);
    string filename="in.txt";
    int NumberOfgroups=6;
    float beta=1.0;
    float epsilon=0.4;
-   int k=200;
+   int k=400;
 
    Graph graph(filename,NumberOfgroups,0.5);
    //unordered_map<string,float> prob=graph.getEdgeprob();
@@ -232,8 +387,12 @@ int main() {
    calcSpreadOf(rr,graph,s1unions2,graph.numberOfGroups);
    cout<<"\n"<<"Size of selected nodes is :"<<s1unions2.size();
 
+   ********************************************USING SIMULATION******************************************
+
 
     cout<<"End";
+
+    */
     /*string myText;
     set<int> infseed;
     ifstream MyReadFile("seed.txt");
@@ -246,7 +405,13 @@ int main() {
     }
     MyReadFile.close();
    // cout<<"\n"<<"Start Influence"<<"\n";
-    calcSpreadOf(rr,graph,s1unions2,graph.numberOfGroups);*/
+    calcSpreadOf(rr,graph,s1unions2,graph.numberOfGroups);
+
+
+    */
+
+
+
 
 
 
