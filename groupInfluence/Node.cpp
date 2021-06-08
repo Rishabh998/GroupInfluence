@@ -6,7 +6,6 @@
  */
 
 #include "Node.h"
-#include "String"
 
 
 Node::Node(int v)

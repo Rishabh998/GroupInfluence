@@ -32,7 +32,7 @@ bool Simulation::hasEdge(int u,int v)
 	return pgenerated<prob;
 }
 
-unordered_set<int> Simulation::InfluenceMaximization(unordered_map<int,float> weights,float scale[],int k,int numSim)
+unordered_set<int> Simulation::InfluenceMaximization(unordered_map<int,float> &weights,float scale[],int k,int numSim)
 {
 	unordered_set<int> seed;
 	while(seed.size()<k)
@@ -89,7 +89,7 @@ unordered_set<int> Simulation::InfluenceMaximization(unordered_map<int,float> we
 	return seed;
 }
 
-vector<int> Simulation::NtimescalcInf(unordered_set<int> &seed,unordered_map<int,float> weights,int number)
+vector<int> Simulation::NtimescalcInf(unordered_set<int> &seed,unordered_map<int,float> &weights,int number)
 {
 	vector<int> res;
 		for(int i=0;i<groupSize;i++)
@@ -114,12 +114,15 @@ vector<int> Simulation::NtimescalcInf(unordered_set<int> &seed,unordered_map<int
 
 	return res;
 }
-vector<int> Simulation::calcInf(unordered_set<int> &seed,unordered_map<int,float> weights) {
+vector<int> &Simulation::calcInf(unordered_set<int> &seed,unordered_map<int,float> &weights) {
 	int result=0.0;
 	vector<int> res;
+	seedOfInfluence.clear();
+	res.clear();
 	for(int i=0;i<groupSize;i++)
 	{
 		res.push_back(0.0);
+		seedOfInfluence.push_back(0.0);
 	}
 	unordered_set<int> visited;
 	unordered_set<int> infSeedThathasWeight;
@@ -133,9 +136,24 @@ vector<int> Simulation::calcInf(unordered_set<int> &seed,unordered_map<int,float
 		int crrnode=s.top();
 		s.pop();
 		visited.insert(crrnode);
-		if(weights.find(crrnode)!=weights.end() && weights[crrnode]!=0)
+		if(weights.find(crrnode)!=weights.end() && infSeedThathasWeight.find(crrnode)==infSeedThathasWeight.end())
 		{
 			infSeedThathasWeight.insert(crrnode);
+			vector<int> groups;
+			groups.clear();
+			if(groupmap.find(crrnode)!=groupmap.end())
+					{
+						groups=groupmap[crrnode];
+
+					}
+					for(const auto&grp:groups)
+					{
+						if(weights.find(crrnode)!=weights.end())
+						{
+							res[grp]+=weights[crrnode];
+							seedOfInfluence[grp]+=weights[crrnode];
+						}
+					}
 		}
 		vector<int> connectedNodes=g[crrnode];
 		for(const auto&elem:connectedNodes)
@@ -146,6 +164,7 @@ vector<int> Simulation::calcInf(unordered_set<int> &seed,unordered_map<int,float
 			}
 		}
 	}
+	/*
 	for(const auto&elem:infSeedThathasWeight)
 	{
 		vector<int> groups;
@@ -163,14 +182,16 @@ vector<int> Simulation::calcInf(unordered_set<int> &seed,unordered_map<int,float
 			}
 		}
 
-	}
-	/*
+	}*/
+/*
 	for(int i=0;i<groupSize;i++)
 		{
 			cout<<i<<"->"<<res[i]<<"\n";
 		}
 		*/
 
-    return res;
+
+   // return res;
+	return seedOfInfluence;
 }
 

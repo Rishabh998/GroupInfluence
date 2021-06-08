@@ -19,15 +19,16 @@ class Simulation {
 public:
 	int groupSize;
 	int nodes;
+	vector<int> seedOfInfluence;
 	unordered_map<string,float> edgeprob;
 	unordered_map<int,vector<int>> g;
 	unordered_map<int,vector<int>> groupmap;
 	unordered_map<int,unordered_map<int,int>> nodeinfo;
 	Simulation(Graph &g);
 	bool hasEdge(int u,int v);
-	unordered_set<int> InfluenceMaximization(unordered_map<int,float> weights,float scale[],int k,int numSim);
-	vector<int> calcInf(unordered_set<int> &seed,unordered_map<int,float> weights);
-	vector<int> NtimescalcInf(unordered_set<int> &seed,unordered_map<int,float> weights,int number);
+	unordered_set<int> InfluenceMaximization(unordered_map<int,float> &weights,float scale[],int k,int numSim);
+	vector<int> &calcInf(unordered_set<int> &seed,unordered_map<int,float> &weights);
+	vector<int> NtimescalcInf(unordered_set<int> &seed,unordered_map<int,float> &weights,int number);
 };
 
 #endif /* SIMULATION_H_ */

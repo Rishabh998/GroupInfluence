@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include "Node.h"
-#include "graph.h"
+#include "Graph.h"
 #include "string.h"
 #include "RRsets.h"
 #include <fstream>

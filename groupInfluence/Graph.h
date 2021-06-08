@@ -45,6 +45,7 @@ public:
 	unordered_map<int,vector<int>> getGraph();
 	unordered_map<string,float> getEdgeprob();
 	void assignGroups(int m,float p);
+	void assignGroupswithFile();
 	void printGraph(unordered_map<int,vector<int>> g);
 	unordered_map<int,unordered_set<int>> getGroups();
 	unordered_set<int> makeS1();

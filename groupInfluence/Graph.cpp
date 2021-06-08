@@ -24,8 +24,9 @@ Graph::Graph(string file,int numberOfGroups,float beta) {
 		this->numberOfGroups= numberOfGroups;
 		//float viarray[numberOfGroups];
 		//vi=viarray;
-		assignGroups( numberOfGroups,1);
+		//assignGroups( numberOfGroups,1);
 		assignVis(0.3);
+		assignGroupswithFile();
 		cout<<"loaded";
 }
 
@@ -60,15 +61,45 @@ unordered_map<int,vector<int>> Graph::transposeGraph()
 	}
 	return gt;
 }
+
 void Graph::assignVis(float beta)
 {
 	for(int i=0;i<numberOfGroups;i++)
 	{
 		//this->vi[i]=beta*groupinfo[i].size();
 		this->vi.push_back(0);
-		this->vi[i]=500;
+		this->vi[i]=120;
 	}
 
+}
+void Graph::assignGroupswithFile()
+{
+	std::ifstream file("group.txt");
+	std::string str;
+	int c=0;
+	while (std::getline(file, str)) {
+		istringstream iss(str);
+		vector<string> tokens{istream_iterator<string>{iss}, istream_iterator<string>{}};
+		//cout<<tokens[0]+" "+tokens[1]<<"\n";
+		int node=stoi(tokens[0]);
+		int group=stoi(tokens[1]);
+		groupnodes.push_back(node);
+		vector<int> a;
+		a.clear();
+		a.push_back(group);
+		if(groupinfo.find(group)==groupinfo.end())
+		{
+			unordered_set<int> grpnodes;
+			grpnodes.insert(node);
+			groupinfo[group]=grpnodes;
+		}
+		else
+		{
+			groupinfo[group].insert(node);
+		}
+		this->groupmap[node]=a;
+
+	}
 }
 void Graph::assignGroups(int m,float p)
 {

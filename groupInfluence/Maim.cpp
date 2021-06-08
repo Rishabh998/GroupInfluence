@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include "Node.h"
-#include "graph.h"
+#include "Graph.h"
 #include "string.h"
 #include "RRsets.h"
 #include <fstream>
@@ -223,6 +223,11 @@ vector<float> SimulationMWU(Graph &graph,unordered_set<int> &s1,int k1,float del
 			cout<<"Size of X is"<<X.size()<<"\n";
 
 			vector<int> spreadOfX=sim.NtimescalcInf(seedX, weights, numSim);
+			cout<<"\n";
+			for(int i=0;i<spreadOfX.size();i++)
+			   {
+				   cout<<i<<"->"<<spreadOfX[i]<<" "<<"\n";
+			   }
 
 
 			for(int i=0;i<m;i++)
@@ -252,12 +257,48 @@ vector<float> SimulationMWU(Graph &graph,unordered_set<int> &s1,int k1,float del
 
 
 int main() {
+
+
+
+	// SPEED OF ONE INFLUENCE
+	/*
+	string filename="result5.txt";
+	int k=50;
+	int numberOfSimulation=50;
+	Graph graph(filename,4,0.5);
+	auto start = high_resolution_clock::now();
+
+	Simulation sim(graph);
+	unordered_map<int,float> weights;
+	float scale[6];
+	for(int i=0;i<6;i++)
+	{
+		scale[i]=1;
+	}
+	for(int i=0;i<=830;i++)
+	{
+		weights[i]=1.0;
+	}
+	unordered_set<int> seed= sim.InfluenceMaximization(weights,scale,k,numberOfSimulation);
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop - start);
+	cout<<"\n"<<"Size of sim result is : "<<seed.size()<<"\n";
+
+	cout << "Time taken by function: "
+	        << duration.count() << " microseconds" << endl;
+	        */
+
+
+
+ //Using Simulation
    cout << "Starting..." << endl;
    auto start = high_resolution_clock::now();
-   string filename="in.txt";
-   int k=100;
+   string filename="result5.txt";
+   int k=50;
    int numberOfSimulation=1;
-   Graph graph(filename,6,0.5);
+   cout<<"Value of k is :"<<k<<"\n";
+   cout<<"Number os dimulations is :"<<numberOfSimulation<<"\n";
+   Graph graph(filename,4,0.5);
 
    unordered_set<int> s1;
    //unordered_set<int> seed;
@@ -313,18 +354,19 @@ int main() {
 
    cout << "Time taken by function: "
         << duration.count() << " microseconds" << endl;
+        //Simulation ends
 
 
 
+
+ //******************************************USING RRSETS**********************************
 /*
- ******************************************USING RRSETS**********************************
-
    Node n(1);
-   string filename="in.txt";
-   int NumberOfgroups=6;
+   string filename="result3.txt";
+   int NumberOfgroups=4;
    float beta=1.0;
    float epsilon=0.4;
-   int k=400;
+   int k=200;
 
    Graph graph(filename,NumberOfgroups,0.5);
    //unordered_map<string,float> prob=graph.getEdgeprob();
@@ -387,12 +429,12 @@ int main() {
    calcSpreadOf(rr,graph,s1unions2,graph.numberOfGroups);
    cout<<"\n"<<"Size of selected nodes is :"<<s1unions2.size();
 
-   ********************************************USING SIMULATION******************************************
+   //RRsets ends*/
 
 
     cout<<"End";
 
-    */
+
     /*string myText;
     set<int> infseed;
     ifstream MyReadFile("seed.txt");
@@ -405,10 +447,10 @@ int main() {
     }
     MyReadFile.close();
    // cout<<"\n"<<"Start Influence"<<"\n";
-    calcSpreadOf(rr,graph,s1unions2,graph.numberOfGroups);
+    calcSpreadOf(rr,graph,s1unions2,graph.numberOfGroups);*/
 
 
-    */
+
 
 
 
